@@ -470,7 +470,7 @@
         cellStyle: undefined,
         searchable: true,
         searchFormatter: true,
-        cardVisible: true
+        cardVisible: true,
     };
 
     BootstrapTable.EVENTS = {
@@ -710,7 +710,8 @@
                     that.header.cellStyles[column.fieldIndex] = column.cellStyle;
                     that.header.searchables[column.fieldIndex] = column.searchable;
 
-                    if (!column.visible) {
+                    var cardViewOnly = column.cardViewOnly || false;
+                    if (!column.visible || cardViewOnly) {
                         return;
                     }
 
@@ -1468,9 +1469,10 @@
                     data_ = '',
                     rowspan_ = '',
                     title_ = '',
-                    column = that.columns[getFieldIndex(that.columns, field)];
+                    column = that.columns[getFieldIndex(that.columns, field)],
+                    cardViewOnly = column.cardViewOnly || false;
 
-                if (!column.visible) {
+                if (!column.visible || (cardViewOnly && !that.options.cardView)) {
                     pagination.total--;
                     return;
                 }
@@ -1753,7 +1755,7 @@
         }
 
         if (!silent) {
-            this.$tableLoading.show();
+            this.showLoading();
         }
         request = $.extend({}, calculateObjectValue(null, this.options.ajaxOptions), {
             type: this.options.method,
@@ -1774,7 +1776,7 @@
             },
             complete: function () {
                 if (!silent) {
-                    that.$tableLoading.hide();
+                    that.hideLoading();
                 }
             }
         });
@@ -2049,9 +2051,10 @@
             visibleFields = [];
 
         $.each(this.header.fields, function (j, field) {
-            var column = that.columns[getFieldIndex(that.columns, field)];
+            var column = that.columns[getFieldIndex(that.columns, field)],
+                cardViewOnly = column.cardViewOnly || false;
 
-            if (!column.visible) {
+            if (!column.visible || cardViewOnly) {
                 return;
             }
             visibleFields.push(field);
@@ -2484,7 +2487,8 @@
 
     BootstrapTable.prototype.getHiddenColumns = function () {
         return $.grep(this.columns, function (column) {
-            return !column.visible;
+            var cardViewOnly = column.cardViewOnly || false;
+            return !column.visible || cardViewOnly;
         });
     };
 
